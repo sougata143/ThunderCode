@@ -5,7 +5,17 @@ import { useEditorStore } from '../../store/editorStore';
 import { useSettingsStore } from '../../store/settingsStore';
 import TabBar from './TabBar';
 
-const Editor = () => {
+interface EditorProps {
+  value?: string;
+  onChange?: (value: string | undefined) => void;
+  language?: string;
+}
+
+const Editor: React.FC<EditorProps> = ({ 
+  value: externalValue, 
+  onChange: externalOnChange, 
+  language: externalLanguage 
+}) => {
   const theme = useTheme();
   const settings = useSettingsStore();
   const { tabs, activeTabId, updateTabContent } = useEditorStore();
@@ -16,9 +26,12 @@ const Editor = () => {
     if (activeTabId && value !== undefined) {
       updateTabContent(activeTabId, value);
     }
+    if (externalOnChange) {
+      externalOnChange(value);
+    }
   };
 
-  if (!activeTab) {
+  if (!activeTab && !externalValue) {
     return (
       <Box
         sx={{
@@ -36,13 +49,13 @@ const Editor = () => {
 
   return (
     <Box sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
-      <TabBar />
+      {activeTab && <TabBar />}
       <Box sx={{ flexGrow: 1 }}>
         <MonacoEditor
           height="100%"
-          language={activeTab.language}
+          language={externalLanguage || activeTab?.language}
           theme={theme.palette.mode === 'dark' ? 'vs-dark' : 'light'}
-          value={activeTab.content}
+          value={externalValue || activeTab?.content}
           onChange={handleEditorChange}
           options={{
             fontSize: settings.fontSize,

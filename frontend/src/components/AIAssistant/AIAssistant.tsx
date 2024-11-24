@@ -42,10 +42,8 @@ const AIAssistant = () => {
     if (!input.trim() || isLoading) return;
 
     const userMessage = {
-      id: messages.length,
       role: 'user' as const,
       content: input,
-      timestamp: new Date(),
     };
 
     addMessage(userMessage);
@@ -57,10 +55,8 @@ const AIAssistant = () => {
       const { response } = await sendChatMessage(input);
       
       addMessage({
-        id: messages.length + 1,
         role: 'assistant',
         content: response,
-        timestamp: new Date(),
       });
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An error occurred');
@@ -95,9 +91,9 @@ const AIAssistant = () => {
   }
 
   return (
-    <Box sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
+    <Box sx={{ height: '100%', display: 'flex', flexDirection: 'column', width: '100%', maxWidth: '800px', mx: 'auto' }}>
       <Box sx={{ flexGrow: 1, overflow: 'auto', p: 2 }}>
-        <List>
+        <List sx={{ width: '100%' }}>
           {messages.map((message) => (
             <ListItem
               key={message.id}
@@ -105,13 +101,14 @@ const AIAssistant = () => {
                 flexDirection: 'column',
                 alignItems: message.role === 'user' ? 'flex-end' : 'flex-start',
                 mb: 2,
+                width: '100%',
               }}
             >
               <Paper
                 elevation={1}
                 sx={{
                   p: 2,
-                  maxWidth: '80%',
+                  width: '95%',
                   bgcolor:
                     message.role === 'user'
                       ? theme.palette.primary.main
@@ -120,6 +117,17 @@ const AIAssistant = () => {
                     message.role === 'user'
                       ? theme.palette.primary.contrastText
                       : theme.palette.text.primary,
+                  '& pre': {
+                    maxWidth: '100%',
+                    overflow: 'auto',
+                    p: 1,
+                    borderRadius: 1,
+                    bgcolor: theme.palette.action.hover,
+                  },
+                  '& code': {
+                    fontFamily: 'monospace',
+                    fontSize: '0.875rem',
+                  }
                 }}
               >
                 <Typography variant="body1" sx={{ whiteSpace: 'pre-wrap' }}>
@@ -138,13 +146,13 @@ const AIAssistant = () => {
       </Box>
 
       {error && (
-        <Alert severity="error" sx={{ m: 2 }} onClose={() => setError(null)}>
+        <Alert severity="error" sx={{ mx: 2, mb: 2 }} onClose={() => setError(null)}>
           {error}
         </Alert>
       )}
 
-      <Box sx={{ p: 2, bgcolor: 'background.paper' }}>
-        <Box sx={{ display: 'flex', gap: 1 }}>
+      <Box sx={{ p: 2, bgcolor: 'background.paper', borderTop: 1, borderColor: 'divider' }}>
+        <Box sx={{ display: 'flex', gap: 1, maxWidth: '100%' }}>
           {messages.length > 0 && (
             <IconButton
               onClick={clearMessages}
@@ -163,7 +171,12 @@ const AIAssistant = () => {
             onKeyPress={handleKeyPress}
             placeholder="Ask me anything about coding..."
             disabled={isLoading}
-            sx={{ flexGrow: 1 }}
+            sx={{
+              flexGrow: 1,
+              '& .MuiInputBase-root': {
+                backgroundColor: theme.palette.background.default,
+              }
+            }}
           />
           <IconButton
             onClick={handleSend}
