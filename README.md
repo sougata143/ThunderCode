@@ -1,282 +1,130 @@
 # ThunderCode
 
-An AI-powered Integrated Development Environment (IDE) that enhances developer productivity through intelligent code generation and development tools.
+ThunderCode is an AI-powered Integrated Development Environment (IDE) that enhances developer productivity through intelligent code generation and development tools. It combines the power of local Large Language Models (LLMs) with a modern, intuitive interface to provide a seamless coding experience.
 
-## 🌟 Features
+## Features
 
-### 🤖 AI-Powered Code Generation
-- Multiple AI model support for diverse coding needs:
-  - **GPT-4**: Most capable model for complex projects and advanced code generation
-  - **GPT-3.5 Turbo**: Fast and cost-effective for simpler projects
-  - **CodeLlama 34B**: Specialized in code generation and completion
-  - **Claude 2**: Advanced reasoning and code understanding
-  - **Qwen 72B**: Multilingual code generation with strong performance in Asian languages
-- Contextual code suggestions
-- Project structure generation
-- Code template customization
-- Intelligent code completion
+### 🤖 Local LLM Integration
+- Run AI models locally for code generation
+- Support for multiple models:
+  - CodeLlama (7B and 13B variants)
+  - StarCoder (7B)
+- Model management interface for downloading and activating models
+- Offline code generation capabilities
 
-### 💻 Supported Programming Languages
-| Language   | AI Code Generation | Project Templates | Testing Framework | Documentation |
-|------------|-------------------|-------------------|-------------------|---------------|
-| Python     | All Models        | ✅                | pytest           | Sphinx        |
-| JavaScript | All Models        | ✅                | Jest             | JSDoc         |
-| TypeScript | All Models        | ✅                | Jest             | TypeDoc       |
-| Java       | All Models        | ✅                | JUnit            | JavaDoc       |
-| C++        | All Models        | ✅                | Google Test      | Doxygen       |
-| Go         | All Models        | ✅                | Go Test          | Go Doc        |
-| Rust       | All Models        | ✅                | Cargo Test       | Rust Doc      |
+### 🎨 Modern UI/UX
+- Clean, intuitive interface built with Material-UI
+- Dark/Light theme support
+- Customizable editor settings
+- Responsive layout with collapsible sidebar
 
-### 🎨 Modern UI Features
-- **Collapsible Sidebar**: Flexible workspace management with collapsible menu for maximized coding space
-- **Multi-Panel Layout**:
-  - File Explorer: Browse and manage project files
-  - Search: Advanced code search capabilities
-  - Source Control: Integrated Git operations
-  - Extensions: Manage IDE extensions
-  - AI Assistant: Quick access to AI features
-  - Debug: Integrated debugging tools
-- **Material Design**: Modern and intuitive user interface with Material-UI components
-- **Responsive Layout**: Adapts to different screen sizes and orientations
-- **Theme Support**: Light and dark mode themes
+### 💻 Development Tools
+- File explorer with project navigation
+- Integrated source control
+- Code search functionality
+- Debug panel
+- Extensions support
+- AI-powered code assistant
 
-## 🏗️ Tech Stack
+## Getting Started
 
-### Frontend
-- React.js with TypeScript
-- Material-UI for components
-- Redux for state management
-- Monaco Editor for code editing
-
-### Backend
-- Django REST Framework
-- Multiple AI Model Integration:
-  - OpenAI API (GPT-4, GPT-3.5)
-  - CodeLlama API
-  - Anthropic API (Claude)
-  - Qwen API
-- MongoDB for data storage
-- Redis for caching
-
-### DevOps
-- Docker containerization
-- AWS deployment (ECS, ECR)
-- GitHub Actions for CI/CD
-- CloudFormation for infrastructure
-
-## 🔧 Prerequisites
-
-- Python 3.8 or higher
-- Node.js 14 or higher
-- Docker and Docker Compose (optional, for containerized setup)
+### Prerequisites
+- Node.js (v16 or higher)
+- Python 3.8+ (for ML service)
 - Git
 
-## 🚀 Getting Started
+### Installation
 
-### 1. Clone the Repository
+1. Clone the repository:
 ```bash
 git clone https://github.com/yourusername/thundercode.git
 cd thundercode
 ```
 
-### 2. Environment Setup
-
-#### Backend Configuration
+2. Install frontend dependencies:
 ```bash
-# Create and activate virtual environment
-cd backend
-python -m venv venv
-source venv/bin/activate  # On Windows: .\venv\Scripts\activate
-
-# Install dependencies
-pip install -r requirements.txt
-
-# Create and configure backend environment
-cp .env.example .env
-
-# Required environment variables in .env:
-DEBUG=1
-DJANGO_ALLOWED_HOSTS=localhost 127.0.0.1 [::1]
-SECRET_KEY=your-secret-key-here
-
-# AI API Keys (at least one is required)
-OPENAI_API_KEY=your_openai_key
-CODELLAMA_API_KEY=your_codellama_key
-ANTHROPIC_API_KEY=your_anthropic_key
-QWEN_API_KEY=your_qwen_key
-QWEN_API_BASE=your_qwen_api_base
-
-# MongoDB Configuration
-MONGODB_HOST=mongodb://localhost:27017/thundercode
-
-# Redis Cache (optional)
-REDIS_URL=redis://localhost:6379/0
-
-# CORS Settings
-CORS_ALLOWED_ORIGINS=http://localhost:3000,http://localhost:5173
-
-# JWT Settings
-JWT_SECRET_KEY=your-jwt-secret-key-here
-
-# Run migrations and start server
-python manage.py migrate
-python manage.py runserver
-```
-
-#### Frontend Configuration
-```bash
-# Install dependencies
 cd frontend
 npm install
-
-# Create and configure frontend environment
-cp .env.example .env
-
-# Required environment variables in .env:
-VITE_API_BASE_URL=http://localhost:8000/api
-VITE_WS_URL=ws://localhost:8000/ws
-VITE_ENV=development
-
-# Start development server
-npm run dev
 ```
 
-### 3. Features
-
-#### Authentication
-- User registration and login
-- JWT token-based authentication
-- Secure token storage and refresh
-- Protected API endpoints
-
-#### AI Chat Integration
-- Real-time chat with AI assistant
-- Multiple AI model support
-- Context-aware code suggestions
-- Error handling and retry mechanisms
-
-#### Code Editor
-- Syntax highlighting
-- Code completion
-- Error detection
-- Multiple language support
-
-#### Project Management
-- Create and manage projects
-- File system navigation
-- Version control integration
-- Dependency management
-
-### 4. Running the Application
-
-#### Option 1: Using Docker (Recommended)
+3. Install backend dependencies:
 ```bash
-# Build and start all services
-docker-compose up --build
-
-# Access the application:
-# Frontend: http://localhost:80
-# Backend API: http://localhost:8000
-# API Documentation: http://localhost:8000/api/docs/
-```
-
-#### Option 2: Local Development Setup
-
-1. Backend Setup:
-```bash
-# Create and activate virtual environment
-cd backend
-python -m venv venv
-source venv/bin/activate  # On Windows: .\venv\Scripts\activate
-
-# Install dependencies
+cd ../backend/ml_service
 pip install -r requirements.txt
-
-# Run migrations
-python manage.py migrate
-
-# Start backend server
-python manage.py runserver
 ```
 
-2. Frontend Setup:
-```bash
-# Install dependencies
-cd frontend
-npm install
+### Running the Application
 
-# Start frontend development server
+1. Start the frontend development server:
+```bash
+cd frontend
 npm start
 ```
 
-3. Access the Application:
-- Frontend: http://localhost:3000
-- Backend API: http://localhost:8000
-- API Documentation: http://localhost:8000/api/docs/
-
-### 5. Development Features
-- Hot reloading enabled for both frontend and backend
-- Debug mode active in development
-- API documentation available
-- Automatic code formatting
-- TypeScript type checking
-
-## 🔍 API Documentation
-
-Once the application is running, you can access the API documentation at:
-- Swagger UI: http://localhost:8000/api/docs/
-- ReDoc: http://localhost:8000/api/redoc/
-
-## 🧪 Testing
-
-### Backend Tests
+2. Start the ML service:
 ```bash
-cd backend
-python manage.py test
+cd backend/ml_service
+uvicorn api:app --reload
 ```
 
-### Frontend Tests
-```bash
-cd frontend
-npm test
+The application will be available at `http://localhost:3000`
+
+## Architecture
+
+### Frontend
+- React with TypeScript
+- Material-UI for components
+- Zustand for state management
+- Monaco Editor for code editing
+- Notistack for notifications
+
+### Backend ML Service
+- FastAPI server
+- Hugging Face Transformers
+- PyTorch for model inference
+- Local model management
+
+## Development
+
+### Project Structure
+```
+thundercode/
+├── frontend/
+│   ├── src/
+│   │   ├── components/
+│   │   ├── services/
+│   │   ├── stores/
+│   │   └── types/
+│   └── package.json
+└── backend/
+    └── ml_service/
+        ├── api.py
+        ├── model_service.py
+        └── requirements.txt
 ```
 
-## 🔐 Security
+### Key Components
+- `LocalLLMManager`: Handles local model management
+- `AIAssistant`: Provides AI-powered code generation
+- `Editor`: Monaco-based code editor
+- `Sidebar`: Navigation and tool access
+- `Settings`: Application configuration
 
-- Secure API key management
-- Encrypted data transmission
-- Role-based access control
-- Regular security updates
-
-## 🤝 Contributing
+## Contributing
 
 1. Fork the repository
-2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to the branch (`git push origin feature/AmazingFeature`)
+2. Create your feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
 5. Open a Pull Request
 
-## 📄 License
+## License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-## 🆘 Troubleshooting
+## Acknowledgments
 
-### Common Issues
-
-1. **Backend API Connection Failed**
-   - Check if backend server is running
-   - Verify API URL in frontend .env file
-   - Ensure all required environment variables are set
-
-2. **AI Model Errors**
-   - Verify API keys are correctly set in backend .env
-   - Check API rate limits
-   - Ensure proper network connectivity
-
-3. **Docker Issues**
-   - Ensure Docker daemon is running
-   - Check port availability (80 and 8000)
-   - Verify Docker Compose installation
-
-For more issues and solutions, please check our [Wiki](wiki) or open an issue.
+- [Hugging Face](https://huggingface.co/) for transformer models
+- [Monaco Editor](https://microsoft.github.io/monaco-editor/)
+- [Material-UI](https://mui.com/)
+- All contributors who have helped shape ThunderCode

@@ -139,6 +139,19 @@ export interface CreateProjectRequest {
     setup_instructions: string;
 }
 
+export interface CodeGenerationRequest {
+    prompt: string;
+    maxLength?: number;
+    temperature?: number;
+    topP?: number;
+    topK?: number;
+    numReturnSequences?: number;
+}
+
+export interface CodeGenerationResponse {
+    generated_code: string;
+}
+
 export const generateProjectStructure = async (params: {
     prompt: string;
     language: string;
@@ -147,6 +160,26 @@ export const generateProjectStructure = async (params: {
 }): Promise<ProjectStructure> => {
     const response = await api.post('/code-generation/generate-project/', params);
     return response.data;
+};
+
+export const generateCode = async (request: CodeGenerationRequest): Promise<string> => {
+    try {
+        const response = await api.post<CodeGenerationResponse>(
+            '/generate',
+            {
+                prompt: request.prompt,
+                max_length: request.maxLength,
+                temperature: request.temperature,
+                top_p: request.topP,
+                top_k: request.topK,
+                num_return_sequences: request.numReturnSequences,
+            }
+        );
+        return response.data.generated_code;
+    } catch (error) {
+        console.error('Error generating code:', error);
+        throw error;
+    }
 };
 
 export const createProject = async (data: CreateProjectRequest) => {
