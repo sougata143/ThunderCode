@@ -1,3 +1,5 @@
+import { config } from '../config/env';
+
 interface LoginCredentials {
   username: string;
   password: string;
@@ -20,9 +22,13 @@ interface UserProfile {
 }
 
 class AuthService {
-  private baseUrl = '/api/auth';
-  private tokenKey = 'thundercode_token';
-  private refreshTokenKey = 'thundercode_refresh_token';
+  private baseUrl = `${config.API_BASE_URL}/auth`;
+  private tokenKey = 'authToken';
+  private refreshTokenKey = 'refreshToken';
+
+  isAuthenticated(): boolean {
+    return !!this.getToken();
+  }
 
   private async request(endpoint: string, options: RequestInit = {}) {
     const response = await fetch(`${this.baseUrl}${endpoint}`, {
@@ -101,8 +107,8 @@ class AuthService {
     return this.request('/profile/');
   }
 
-  async updateProfile(data: Partial<UserProfile>) {
-    return this.request('/profile/update/', {
+  async updateProfile(data: Partial<UserProfile>): Promise<UserProfile> {
+    return this.request('/profile/', {
       method: 'PATCH',
       body: JSON.stringify(data),
     });
@@ -110,20 +116,13 @@ class AuthService {
 
   async changePassword(oldPassword: string, newPassword: string) {
     return this.request('/change-password/', {
-      method: 'PUT',
-      body: JSON.stringify({
-        old_password: oldPassword,
-        new_password: newPassword,
-      }),
+      method: 'POST',
+      body: JSON.stringify({ old_password: oldPassword, new_password: newPassword }),
     });
   }
 
   logout() {
     this.clearTokens();
-  }
-
-  isAuthenticated(): boolean {
-    return !!this.getToken();
   }
 }
 
