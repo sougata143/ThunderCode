@@ -70,41 +70,91 @@ cd thundercode
 
 #### Backend Configuration
 ```bash
-# Create and configure backend environment
-cp backend/.env.example backend/.env
+# Create and activate virtual environment
+cd backend
+python -m venv venv
+source venv/bin/activate  # On Windows: .\venv\Scripts\activate
 
-# Required environment variables in backend/.env:
+# Install dependencies
+pip install -r requirements.txt
+
+# Create and configure backend environment
+cp .env.example .env
+
+# Required environment variables in .env:
 DEBUG=1
 DJANGO_ALLOWED_HOSTS=localhost 127.0.0.1 [::1]
 SECRET_KEY=your-secret-key-here
 
-# AI API Keys
+# AI API Keys (at least one is required)
 OPENAI_API_KEY=your_openai_key
 CODELLAMA_API_KEY=your_codellama_key
 ANTHROPIC_API_KEY=your_anthropic_key
 QWEN_API_KEY=your_qwen_key
 QWEN_API_BASE=your_qwen_api_base
 
-# Database Configuration
-DB_NAME=thundercode
-DB_USER=thundercode
-DB_PASSWORD=thundercode
-DB_HOST=localhost
-DB_PORT=5432
+# MongoDB Configuration
+MONGODB_HOST=mongodb://localhost:27017/thundercode
+
+# Redis Cache (optional)
+REDIS_URL=redis://localhost:6379/0
+
+# CORS Settings
+CORS_ALLOWED_ORIGINS=http://localhost:3000,http://localhost:5173
+
+# JWT Settings
+JWT_SECRET_KEY=your-jwt-secret-key-here
+
+# Run migrations and start server
+python manage.py migrate
+python manage.py runserver
 ```
 
 #### Frontend Configuration
 ```bash
-# Create and configure frontend environment
-cp frontend/.env.example frontend/.env
+# Install dependencies
+cd frontend
+npm install
 
-# Required environment variables in frontend/.env:
-REACT_APP_API_URL=http://localhost:8000
-REACT_APP_WS_URL=ws://localhost:8000/ws/
-REACT_APP_ENV=development
+# Create and configure frontend environment
+cp .env.example .env
+
+# Required environment variables in .env:
+VITE_API_BASE_URL=http://localhost:8000/api
+VITE_WS_URL=ws://localhost:8000/ws
+VITE_ENV=development
+
+# Start development server
+npm run dev
 ```
 
-### 3. Running the Application
+### 3. Features
+
+#### Authentication
+- User registration and login
+- JWT token-based authentication
+- Secure token storage and refresh
+- Protected API endpoints
+
+#### AI Chat Integration
+- Real-time chat with AI assistant
+- Multiple AI model support
+- Context-aware code suggestions
+- Error handling and retry mechanisms
+
+#### Code Editor
+- Syntax highlighting
+- Code completion
+- Error detection
+- Multiple language support
+
+#### Project Management
+- Create and manage projects
+- File system navigation
+- Version control integration
+- Dependency management
+
+### 4. Running the Application
 
 #### Option 1: Using Docker (Recommended)
 ```bash
@@ -151,7 +201,7 @@ npm start
 - Backend API: http://localhost:8000
 - API Documentation: http://localhost:8000/api/docs/
 
-### 4. Development Features
+### 5. Development Features
 - Hot reloading enabled for both frontend and backend
 - Debug mode active in development
 - API documentation available

@@ -13,6 +13,8 @@ import {
   Box,
   Typography,
   CircularProgress,
+  Snackbar,
+  Alert,
 } from '@mui/material';
 import { useProjectStore } from '../../store/projectStore';
 import { useCodeGenerationStore } from '../../store/codeGenerationStore';
@@ -46,11 +48,12 @@ export const CreateProjectDialog: React.FC<CreateProjectDialogProps> = ({
 }) => {
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
-  const [language, setLanguage] = useState('');
+  const [language, setLanguage] = useState<string>('');
   const [aiModel, setAIModel] = useState('gpt-4');
   const [prompt, setPrompt] = useState('');
   const [gitRepo, setGitRepo] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const createProject = useProjectStore((state) => state.createProject);
   const generateProjectStructure = useCodeGenerationStore(
@@ -59,32 +62,38 @@ export const CreateProjectDialog: React.FC<CreateProjectDialogProps> = ({
 
   const handleSubmit = async () => {
     if (!name || !description || !language) {
+      setError('Please fill in all required fields');
       return;
     }
 
     setIsLoading(true);
+    setError(null);
+    
     try {
       const projectStructure = await generateProjectStructure({
-        name,
-        description,
+        prompt: `Create a ${language} project named "${name}" with the following description: ${description}. ${prompt}`,
         language,
         aiModel,
-        prompt,
+        projectId: 0
       });
 
       await createProject({
         name,
         description,
-        language,
-        gitRepo,
+        programming_language: language,
+        git_repo_url: gitRepo,
         files: projectStructure.files,
-        dependencies: projectStructure.dependencies,
-        setupInstructions: projectStructure.setupInstructions,
+        dependencies: Object.entries(projectStructure.dependencies).map(([key, value]) => ({ 
+          name: key, 
+          version: value 
+        })),
+        setupInstructions: projectStructure.setup_instructions,
       });
 
-      onClose();
+      handleClose();
     } catch (error) {
       console.error('Failed to create project:', error);
+      setError(error instanceof Error ? error.message : 'Failed to create project');
     } finally {
       setIsLoading(false);
     }
@@ -97,6 +106,7 @@ export const CreateProjectDialog: React.FC<CreateProjectDialogProps> = ({
     setAIModel('gpt-4');
     setPrompt('');
     setGitRepo('');
+    setError(null);
     onClose();
   };
 
@@ -125,7 +135,7 @@ export const CreateProjectDialog: React.FC<CreateProjectDialogProps> = ({
             <InputLabel>Programming Language</InputLabel>
             <Select
               value={language}
-              onChange={(e) => setLanguage(e.target.value)}
+              onChange={(e) => setLanguage(Array.isArray(e.target.value) ? e.target.value[0] : e.target.value)}
               label="Programming Language"
             >
               {LANGUAGE_OPTIONS.map((lang) => (
@@ -183,6 +193,17 @@ export const CreateProjectDialog: React.FC<CreateProjectDialogProps> = ({
           {isLoading ? <CircularProgress size={24} /> : 'Create Project'}
         </Button>
       </DialogActions>
+
+      <Snackbar 
+        open={!!error} 
+        autoHideDuration={6000} 
+        onClose={() => setError(null)}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+      >
+        <Alert onClose={() => setError(null)} severity="error">
+          {error}
+        </Alert>
+      </Snackbar>
     </Dialog>
   );
 };

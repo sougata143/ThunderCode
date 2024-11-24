@@ -1,4 +1,15 @@
 import { create } from 'zustand';
+import * as apiService from '../services/api';
+
+interface ProjectCreationData {
+  name: string;
+  description: string;
+  programming_language: string;
+  git_repo_url?: string;
+  files: { [key: string]: string };
+  dependencies: Array<{ name: string; version: string }>;
+  setupInstructions: string;
+}
 
 interface Project {
   id: number;
@@ -31,7 +42,7 @@ interface ProjectState {
   isLoading: boolean;
   error: string | null;
   fetchProjects: () => Promise<void>;
-  createProject: (data: Partial<Project>) => Promise<Project>;
+  createProject: (data: ProjectCreationData) => Promise<Project>;
   updateProject: (id: number, data: Partial<Project>) => Promise<void>;
   deleteProject: (id: number) => Promise<void>;
   setCurrentProject: (project: Project | null) => void;
@@ -49,11 +60,7 @@ export const useProjectStore = create<ProjectState>((set, get) => ({
   fetchProjects: async () => {
     set({ isLoading: true, error: null });
     try {
-      const response = await fetch('/api/projects/');
-      if (!response.ok) {
-        throw new Error('Failed to fetch projects');
-      }
-      const projects = await response.json();
+      const projects = await apiService.getProjects();
       set({ projects });
     } catch (error) {
       set({ error: error instanceof Error ? error.message : 'Failed to fetch projects' });
@@ -65,23 +72,10 @@ export const useProjectStore = create<ProjectState>((set, get) => ({
   createProject: async (data) => {
     set({ isLoading: true, error: null });
     try {
-      const response = await fetch('/api/projects/', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(data),
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to create project');
-      }
-
-      const project = await response.json();
+      const project = await apiService.createProject(data);
       set((state) => ({
         projects: [...state.projects, project],
       }));
-
       return project;
     } catch (error) {
       set({ error: error instanceof Error ? error.message : 'Failed to create project' });
@@ -94,25 +88,10 @@ export const useProjectStore = create<ProjectState>((set, get) => ({
   updateProject: async (id, data) => {
     set({ isLoading: true, error: null });
     try {
-      const response = await fetch(`/api/projects/${id}/`, {
-        method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(data),
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to update project');
-      }
-
-      const updatedProject = await response.json();
+      const updatedProject = await apiService.updateProject(id, data);
       set((state) => ({
-        projects: state.projects.map((p) =>
-          p.id === id ? updatedProject : p
-        ),
-        currentProject:
-          state.currentProject?.id === id ? updatedProject : state.currentProject,
+        projects: state.projects.map((p) => (p.id === id ? updatedProject : p)),
+        currentProject: state.currentProject?.id === id ? updatedProject : state.currentProject,
       }));
     } catch (error) {
       set({ error: error instanceof Error ? error.message : 'Failed to update project' });
@@ -125,14 +104,7 @@ export const useProjectStore = create<ProjectState>((set, get) => ({
   deleteProject: async (id) => {
     set({ isLoading: true, error: null });
     try {
-      const response = await fetch(`/api/projects/${id}/`, {
-        method: 'DELETE',
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to delete project');
-      }
-
+      await apiService.deleteProject(id);
       set((state) => ({
         projects: state.projects.filter((p) => p.id !== id),
         currentProject: state.currentProject?.id === id ? null : state.currentProject,
@@ -160,7 +132,6 @@ export const useProjectStore = create<ProjectState>((set, get) => ({
       set({ projectSettings: settings });
     } catch (error) {
       set({ error: error instanceof Error ? error.message : 'Failed to fetch project settings' });
-      throw error;
     } finally {
       set({ isLoading: false });
     }
@@ -185,7 +156,6 @@ export const useProjectStore = create<ProjectState>((set, get) => ({
       set({ projectSettings: updatedSettings });
     } catch (error) {
       set({ error: error instanceof Error ? error.message : 'Failed to update project settings' });
-      throw error;
     } finally {
       set({ isLoading: false });
     }

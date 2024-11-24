@@ -15,6 +15,7 @@ import { Send as SendIcon, Delete as DeleteIcon } from '@mui/icons-material';
 import { useAIStore } from '../../store/aiStore';
 import { useSettingsStore } from '../../store/settingsStore';
 import { useState } from 'react';
+import { sendChatMessage } from '../../services/aiService';
 
 interface Message {
   id: number;
@@ -40,42 +41,38 @@ const AIAssistant = () => {
   const handleSend = async () => {
     if (!input.trim() || isLoading) return;
 
-    addMessage({
+    const userMessage = {
       id: messages.length,
-      role: 'user',
+      role: 'user' as const,
       content: input,
       timestamp: new Date(),
-    });
+    };
 
+    addMessage(userMessage);
     setInput('');
     setLoading(true);
     setError(null);
 
     try {
-      const response = await fetch('/api/ai/chat', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ message: input }),
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to get response from AI');
-      }
-
-      const data = await response.json();
+      const { response } = await sendChatMessage(input);
       
       addMessage({
         id: messages.length + 1,
         role: 'assistant',
-        content: data.response,
+        content: response,
         timestamp: new Date(),
       });
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An error occurred');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleKeyPress = (event: React.KeyboardEvent) => {
+    if (event.key === 'Enter' && !event.shiftKey) {
+      event.preventDefault();
+      handleSend();
     }
   };
 
@@ -99,74 +96,80 @@ const AIAssistant = () => {
 
   return (
     <Box sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
-      <Box sx={{ 
-        p: 2, 
-        borderBottom: 1, 
-        borderColor: 'divider',
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'center'
-      }}>
-        <Typography variant="h6">AI Assistant</Typography>
-        <IconButton
-          onClick={clearMessages}
-          disabled={messages.length === 0}
-          color="inherit"
-        >
-          <DeleteIcon />
-        </IconButton>
+      <Box sx={{ flexGrow: 1, overflow: 'auto', p: 2 }}>
+        <List>
+          {messages.map((message) => (
+            <ListItem
+              key={message.id}
+              sx={{
+                flexDirection: 'column',
+                alignItems: message.role === 'user' ? 'flex-end' : 'flex-start',
+                mb: 2,
+              }}
+            >
+              <Paper
+                elevation={1}
+                sx={{
+                  p: 2,
+                  maxWidth: '80%',
+                  bgcolor:
+                    message.role === 'user'
+                      ? theme.palette.primary.main
+                      : theme.palette.background.paper,
+                  color:
+                    message.role === 'user'
+                      ? theme.palette.primary.contrastText
+                      : theme.palette.text.primary,
+                }}
+              >
+                <Typography variant="body1" sx={{ whiteSpace: 'pre-wrap' }}>
+                  {message.content}
+                </Typography>
+                <Typography
+                  variant="caption"
+                  sx={{ display: 'block', mt: 1, opacity: 0.7 }}
+                >
+                  {new Date(message.timestamp).toLocaleTimeString()}
+                </Typography>
+              </Paper>
+            </ListItem>
+          ))}
+        </List>
       </Box>
 
       {error && (
-        <Alert severity="error" sx={{ m: 2 }}>
+        <Alert severity="error" sx={{ m: 2 }} onClose={() => setError(null)}>
           {error}
         </Alert>
       )}
 
-      <List sx={{ flexGrow: 1, overflow: 'auto', p: 2 }}>
-        {messages.map((message) => (
-          <ListItem
-            key={message.id}
-            sx={{
-              flexDirection: 'column',
-              alignItems: message.role === 'user' ? 'flex-end' : 'flex-start',
-              mb: 2,
-            }}
-          >
-            <Paper
-              sx={{
-                p: 2,
-                maxWidth: '80%',
-                backgroundColor:
-                  message.role === 'user'
-                    ? theme.palette.primary.main
-                    : theme.palette.background.paper,
-              }}
-            >
-              <ListItemText
-                primary={message.content}
-                secondary={message.timestamp.toLocaleTimeString()}
-              />
-            </Paper>
-          </ListItem>
-        ))}
-      </List>
-
-      <Box sx={{ p: 2, borderTop: 1, borderColor: 'divider' }}>
+      <Box sx={{ p: 2, bgcolor: 'background.paper' }}>
         <Box sx={{ display: 'flex', gap: 1 }}>
+          {messages.length > 0 && (
+            <IconButton
+              onClick={clearMessages}
+              color="default"
+              sx={{ alignSelf: 'flex-end' }}
+            >
+              <DeleteIcon />
+            </IconButton>
+          )}
           <TextField
             fullWidth
-            variant="outlined"
-            placeholder="Ask me anything..."
+            multiline
+            maxRows={4}
             value={input}
             onChange={(e) => setInput(e.target.value)}
-            onKeyPress={(e) => e.key === 'Enter' && handleSend()}
+            onKeyPress={handleKeyPress}
+            placeholder="Ask me anything about coding..."
             disabled={isLoading}
+            sx={{ flexGrow: 1 }}
           />
           <IconButton
-            color="primary"
             onClick={handleSend}
-            disabled={isLoading || !input.trim()}
+            color="primary"
+            disabled={!input.trim() || isLoading}
+            sx={{ alignSelf: 'flex-end' }}
           >
             {isLoading ? <CircularProgress size={24} /> : <SendIcon />}
           </IconButton>
