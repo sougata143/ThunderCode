@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import * as apiService from '../services/api';
+import apiService from '../services/api';
 
 interface GeneratedCode {
   id: number;

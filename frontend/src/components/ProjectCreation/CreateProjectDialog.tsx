@@ -87,7 +87,8 @@ export const CreateProjectDialog: React.FC<CreateProjectDialogProps> = ({
           name: key, 
           version: value 
         })),
-        setupInstructions: projectStructure.setup_instructions,
+        setup_instructions: projectStructure.setup_instructions,
+        version: `0.1.0-${new Date().toISOString().split('T')[0]}`,
       });
 
       handleClose();

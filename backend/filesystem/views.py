@@ -31,6 +31,42 @@ def get_file_language(file_path):
     }
     return extension_map.get(file_path.suffix.lower(), 'plaintext')
 
+def scan_directory(path: Path, relative_to: Path = None) -> dict:
+    """Recursively scan a directory and return its structure."""
+    if relative_to is None:
+        relative_to = path.parent
+
+    result = {
+        'name': path.name,
+        'type': 'directory' if path.is_dir() else 'file',
+        'path': str(path.relative_to(relative_to)),
+    }
+
+    if path.is_dir():
+        try:
+            children = []
+            for item in path.iterdir():
+                # Skip hidden files and directories
+                if not item.name.startswith('.'):
+                    children.append(scan_directory(item, relative_to))
+            result['children'] = sorted(children, key=lambda x: (x['type'] == 'file', x['name'].lower()))
+        except PermissionError:
+            # Handle permission errors gracefully
+            result['error'] = 'Permission denied'
+    else:
+        try:
+            # Add file-specific information
+            stats = path.stat()
+            result.update({
+                'size': stats.st_size,
+                'lastModified': stats.st_mtime,
+                'language': get_file_language(path)
+            })
+        except (PermissionError, FileNotFoundError):
+            result['error'] = 'Unable to read file info'
+
+    return result
+
 @csrf_exempt
 def list_directory(request):
     """List contents of a directory."""
@@ -190,5 +226,35 @@ def rename_path(request):
         old_target.rename(new_target)
         return JsonResponse({'success': True})
 
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)
+
+@csrf_exempt
+def load_local_folder(request):
+    """Load the structure of a local folder."""
+    if request.method != 'POST':
+        return JsonResponse({'error': 'Method not allowed'}, status=405)
+
+    try:
+        data = json.loads(request.body)
+        folder_path = data.get('path', '')
+        
+        if not folder_path:
+            return JsonResponse({'error': 'Path is required'}, status=400)
+
+        path = Path(folder_path)
+        
+        if not path.exists():
+            return JsonResponse({'error': 'Path does not exist'}, status=404)
+            
+        if not path.is_dir():
+            return JsonResponse({'error': 'Path is not a directory'}, status=400)
+
+        # Scan the directory and get its structure
+        structure = scan_directory(path)
+        return JsonResponse(structure)
+
+    except json.JSONDecodeError:
+        return JsonResponse({'error': 'Invalid JSON'}, status=400)
     except Exception as e:
         return JsonResponse({'error': str(e)}, status=500)

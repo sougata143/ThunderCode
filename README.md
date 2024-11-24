@@ -14,17 +14,30 @@ ThunderCode is an AI-powered Integrated Development Environment (IDE) that enhan
 
 ### 🎨 Modern UI/UX
 - Clean, intuitive interface built with Material-UI
-- Dark/Light theme support
+- Dark theme optimized for coding
 - Customizable editor settings
 - Responsive layout with collapsible sidebar
+- Professional file explorer with file preview
+- Side-by-side AI assistant integration
 
 ### 💻 Development Tools
-- File explorer with project navigation
+- Advanced file explorer with:
+  - Local folder browsing
+  - File content preview and editing
+  - Support for multiple file types (text, images, PDFs)
+  - Tree view navigation
 - Integrated source control
 - Code search functionality
 - Debug panel
 - Extensions support
 - AI-powered code assistant
+
+### 📝 Editor Features
+- Syntax highlighting
+- Code completion
+- Real-time error detection
+- Multiple file support
+- Dark theme optimized for long coding sessions
 
 ## Getting Started
 
@@ -77,6 +90,7 @@ The application will be available at `http://localhost:3000`
 - Zustand for state management
 - Monaco Editor for code editing
 - Notistack for notifications
+- File System Access API for local file handling
 
 ### Backend ML Service
 - FastAPI server
@@ -92,6 +106,10 @@ thundercode/
 ├── frontend/
 │   ├── src/
 │   │   ├── components/
+│   │   │   ├── Explorer/      # File explorer components
+│   │   │   ├── Editor/        # Code editor components
+│   │   │   ├── AIAssistant/   # AI integration components
+│   │   │   └── Layout/        # Layout components
 │   │   ├── services/
 │   │   ├── stores/
 │   │   └── types/
@@ -99,32 +117,35 @@ thundercode/
 └── backend/
     └── ml_service/
         ├── api.py
-        ├── model_service.py
         └── requirements.txt
 ```
 
 ### Key Components
-- `LocalLLMManager`: Handles local model management
-- `AIAssistant`: Provides AI-powered code generation
-- `Editor`: Monaco-based code editor
-- `Sidebar`: Navigation and tool access
-- `Settings`: Application configuration
+
+#### File Explorer
+- Local folder selection and browsing
+- Recursive directory traversal
+- File content preview and editing
+- Support for various file types
+- Professional dark theme UI
+
+#### Code Editor
+- Monaco Editor integration
+- Syntax highlighting
+- Code completion
+- Error detection
+- Multiple language support
+
+#### AI Assistant
+- Real-time code suggestions
+- Context-aware completions
+- Local model inference
+- Offline support
 
 ## Contributing
 
-1. Fork the repository
-2. Create your feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
+Please read [CONTRIBUTING.md](CONTRIBUTING.md) for details on our code of conduct and the process for submitting pull requests.
 
 ## License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
-## Acknowledgments
-
-- [Hugging Face](https://huggingface.co/) for transformer models
-- [Monaco Editor](https://microsoft.github.io/monaco-editor/)
-- [Material-UI](https://mui.com/)
-- All contributors who have helped shape ThunderCode

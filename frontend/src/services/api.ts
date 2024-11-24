@@ -27,43 +27,6 @@ interface TokenResponse {
     refresh: string;
 }
 
-let isRefreshing = false;
-let failedQueue: Array<{
-    resolve: (token: string) => void;
-    reject: (error: any) => void;
-}> = [];
-
-const processQueue = (error: any, token: string | null = null) => {
-    failedQueue.forEach((prom) => {
-        if (error) {
-            prom.reject(error);
-        } else {
-            prom.resolve(token!);
-        }
-    });
-    failedQueue = [];
-};
-
-// Refresh token function
-const refreshAccessToken = async (): Promise<string> => {
-    try {
-        const refresh = localStorage.getItem('refreshToken');
-        if (!refresh) throw new Error('No refresh token available');
-
-        const response = await axios.post<TokenResponse>(
-            `${config.API_BASE_URL}/auth/token/refresh/`,
-            { refresh }
-        );
-
-        localStorage.setItem('authToken', response.data.access);
-        return response.data.access;
-    } catch (error) {
-        localStorage.removeItem('authToken');
-        localStorage.removeItem('refreshToken');
-        throw error;
-    }
-};
-
 // Add auth token to requests if available
 api.interceptors.request.use((config) => {
     const token = localStorage.getItem('authToken');
@@ -73,49 +36,40 @@ api.interceptors.request.use((config) => {
     return config;
 });
 
-// Handle token refresh on 401 errors
+// Handle response errors, particularly 401s
 api.interceptors.response.use(
     (response) => response,
     async (error: AxiosError<ApiErrorResponse>) => {
-        const originalRequest = error.config;
-        if (!originalRequest) {
-            return Promise.reject(error);
-        }
-
-        // If error is 401 and we haven't tried to refresh the token yet
-        if (
-            error.response?.status === 401 &&
-            error.response?.data?.code === 'token_not_valid' &&
-            !originalRequest._retry
-        ) {
-            if (isRefreshing) {
-                // If token refresh is in progress, queue the request
-                try {
-                    const token = await new Promise<string>((resolve, reject) => {
-                        failedQueue.push({ resolve, reject });
-                    });
-                    originalRequest.headers.Authorization = `Bearer ${token}`;
-                    return api(originalRequest);
-                } catch (err) {
-                    return Promise.reject(err);
-                }
-            }
-
+        const originalRequest = error.config as InternalAxiosRequestConfig & { _retry?: boolean };
+        
+        // If error is 401 and we haven't retried yet
+        if (error.response?.status === 401 && !originalRequest._retry) {
             originalRequest._retry = true;
-            isRefreshing = true;
-
+            
             try {
-                const token = await refreshAccessToken();
-                originalRequest.headers.Authorization = `Bearer ${token}`;
-                processQueue(null, token);
-                return api(originalRequest);
+                const refresh = localStorage.getItem('refreshToken');
+                if (!refresh) {
+                    throw new Error('No refresh token available');
+                }
+
+                // Get new access token
+                const response = await axios.post<TokenResponse>(
+                    `${config.API_BASE_URL}/auth/token/refresh/`,
+                    { refresh }
+                );
+
+                // Store new access token
+                localStorage.setItem('authToken', response.data.access);
+
+                // Update the failed request with new token and retry
+                originalRequest.headers.Authorization = `Bearer ${response.data.access}`;
+                return axios(originalRequest);
             } catch (refreshError) {
-                processQueue(refreshError, null);
-                // Redirect to login or handle authentication failure
+                // If refresh fails, clear tokens and redirect to login
+                localStorage.removeItem('authToken');
+                localStorage.removeItem('refreshToken');
                 window.location.href = '/login';
                 return Promise.reject(refreshError);
-            } finally {
-                isRefreshing = false;
             }
         }
 
@@ -150,6 +104,13 @@ export interface CodeGenerationRequest {
 
 export interface CodeGenerationResponse {
     generated_code: string;
+}
+
+interface FileNode {
+    name: string;
+    type: 'file' | 'directory';
+    path: string;
+    children?: FileNode[];
 }
 
 export const generateProjectStructure = async (params: {
@@ -206,4 +167,94 @@ export const updateProject = async (id: number, data: Partial<CreateProjectReque
     return response.data;
 };
 
-export default api;
+// File Operations
+export const getProjectFiles = async (projectId: number): Promise<FileNode[]> => {
+    const response = await api.get(`/projects/${projectId}/files`);
+    return response.data;
+};
+
+export const createProjectFile = async (projectId: number, path: string, content: string = '') => {
+    const response = await api.post(`/projects/${projectId}/files`, {
+        path,
+        content,
+    });
+    return response.data;
+};
+
+export const createProjectDirectory = async (projectId: number, path: string) => {
+    const response = await api.post(`/projects/${projectId}/directories`, {
+        path,
+    });
+    return response.data;
+};
+
+export const getFileContent = async (projectId: number, path: string): Promise<string> => {
+    const response = await api.get(`/projects/${projectId}/files/${encodeURIComponent(path)}/content`);
+    return response.data.content;
+};
+
+export const updateFileContent = async (projectId: number, path: string, content: string) => {
+    const response = await api.put(`/projects/${projectId}/files/${encodeURIComponent(path)}/content`, {
+        content,
+    });
+    return response.data;
+};
+
+export const deleteFile = async (projectId: number, path: string) => {
+    await api.delete(`/projects/${projectId}/files/${encodeURIComponent(path)}`);
+};
+
+export const deleteDirectory = async (projectId: number, path: string) => {
+    await api.delete(`/projects/${projectId}/directories/${encodeURIComponent(path)}`);
+};
+
+export const moveFile = async (projectId: number, oldPath: string, newPath: string) => {
+    const response = await api.post(`${config.API_BASE_URL}/projects/${projectId}/files/move`, {
+        oldPath,
+        newPath,
+    });
+    return response.data;
+};
+
+export const moveDirectory = async (projectId: number, oldPath: string, newPath: string) => {
+    const response = await api.post(`${config.API_BASE_URL}/projects/${projectId}/directories/move`, {
+        oldPath,
+        newPath,
+    });
+    return response.data;
+};
+
+export const getFilePreview = async (projectId: number, path: string) => {
+    const response = await api.get(`${config.API_BASE_URL}/projects/${projectId}/files/preview`, {
+        params: { path },
+    });
+    return response.data.content;
+};
+
+async function loadLocalFolder(path: string): Promise<FileNode[]> {
+  const response = await api.post('/filesystem/load-local-folder/', { path });
+  return response.data;
+}
+
+const apiService = {
+  generateProjectStructure,
+  generateCode,
+  createProject,
+  getProjects,
+  getProject,
+  deleteProject,
+  updateProject,
+  getProjectFiles,
+  createProjectFile,
+  createProjectDirectory,
+  getFileContent,
+  updateFileContent,
+  deleteFile,
+  deleteDirectory,
+  moveFile,
+  moveDirectory,
+  getFilePreview,
+  loadLocalFolder,
+};
+
+export default apiService;

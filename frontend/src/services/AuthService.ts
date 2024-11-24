@@ -31,13 +31,16 @@ class AuthService {
   }
 
   private async request(endpoint: string, options: RequestInit = {}) {
+    const authHeader = this.getAuthHeader();
+    const headers: HeadersInit = {
+      'Content-Type': 'application/json',
+      ...(authHeader && { Authorization: authHeader }),
+      ...(options.headers || {}),
+    };
+
     const response = await fetch(`${this.baseUrl}${endpoint}`, {
       ...options,
-      headers: {
-        'Content-Type': 'application/json',
-        ...this.getAuthHeader(),
-        ...options.headers,
-      },
+      headers,
     });
 
     if (!response.ok) {
@@ -48,9 +51,9 @@ class AuthService {
     return response.json();
   }
 
-  private getAuthHeader() {
+  private getAuthHeader(): string | undefined {
     const token = this.getToken();
-    return token ? { Authorization: `Bearer ${token}` } : {};
+    return token ? `Bearer ${token}` : undefined;
   }
 
   getToken(): string | null {
@@ -94,17 +97,32 @@ class AuthService {
       throw new Error('No refresh token available');
     }
 
-    const response = await this.request('/token/refresh/', {
-      method: 'POST',
-      body: JSON.stringify({ refresh }),
-    });
+    try {
+      const response = await this.request('/token/refresh/', {
+        method: 'POST',
+        body: JSON.stringify({ refresh }),
+      });
 
-    this.setTokens(response.access, refresh);
-    return response;
+      this.setTokens(response.access, refresh);
+      return response;
+    } catch (error) {
+      this.clearTokens(); // Clear tokens on refresh failure
+      throw error;
+    }
   }
 
   async getProfile(): Promise<UserProfile> {
-    return this.request('/profile/');
+    try {
+      return await this.request('/profile/');
+    } catch (error) {
+      if (error instanceof Error && error.message.includes('401')) {
+        // Try to refresh the token if we get a 401
+        await this.refreshToken();
+        // Retry the request with the new token
+        return this.request('/profile/');
+      }
+      throw error;
+    }
   }
 
   async updateProfile(data: Partial<UserProfile>): Promise<UserProfile> {
