@@ -19,7 +19,7 @@ import {
   Source,
   ChevronLeft,
   ChevronRight,
-  Menu as MenuIcon,
+  Settings as SettingsIcon,
 } from '@mui/icons-material';
 import { useState } from 'react';
 import FileExplorer from '../Explorer/FileExplorer';
@@ -28,12 +28,13 @@ import SourceControl from '../SourceControl/SourceControl';
 import ExtensionsManager from '../Extensions/ExtensionsManager';
 import DebugPanel from '../Debug/DebugPanel';
 import AIAssistant from '../AIAssistant/AIAssistant';
+import Settings from '../Settings/Settings';
 
 const DRAWER_WIDTH = 240;
 const COLLAPSED_WIDTH = 56;
 const PANEL_WIDTH = 300;
 
-export type SidebarView = 'explorer' | 'search' | 'sourceControl' | 'extensions' | 'aiAssistant' | 'debug';
+export type SidebarView = 'explorer' | 'search' | 'sourceControl' | 'extensions' | 'aiAssistant' | 'debug' | 'settings';
 
 const Sidebar = () => {
   const theme = useTheme();
@@ -67,6 +68,8 @@ const Sidebar = () => {
         return <AIAssistant />;
       case 'debug':
         return <DebugPanel />;
+      case 'settings':
+        return <Settings />;
       default:
         return null;
     }
@@ -94,7 +97,7 @@ const Sidebar = () => {
           },
         }}
       >
-        <Box sx={{ overflow: 'auto' }}>
+        <Box sx={{ overflow: 'auto', display: 'flex', flexDirection: 'column', height: '100%' }}>
           <List>
             {menuItems.map((item) => (
               <Tooltip 
@@ -147,12 +150,61 @@ const Sidebar = () => {
               </Tooltip>
             ))}
           </List>
-          <Divider />
-          <Box sx={{ display: 'flex', justifyContent: 'flex-end', p: 1 }}>
-            <IconButton onClick={handleDrawerToggle}>
-              {isCollapsed ? <ChevronRight /> : <ChevronLeft />}
-            </IconButton>
-          </Box>
+          <Box sx={{ flexGrow: 1 }} />
+          <List>
+            <Tooltip 
+              title={isCollapsed ? 'Settings' : ''} 
+              placement="right"
+            >
+              <ListItem
+                button
+                selected={activeView === 'settings'}
+                onClick={() => setActiveView('settings')}
+                sx={{
+                  '&.Mui-selected': {
+                    backgroundColor: theme.palette.action.selected,
+                  },
+                  '&.Mui-selected:hover': {
+                    backgroundColor: theme.palette.action.selected,
+                  },
+                  minHeight: 48,
+                  px: isCollapsed ? 1.5 : 2,
+                  justifyContent: isCollapsed ? 'center' : 'flex-start',
+                }}
+              >
+                <ListItemIcon
+                  sx={{
+                    color: activeView === 'settings'
+                      ? theme.palette.primary.main
+                      : 'inherit',
+                    minWidth: isCollapsed ? 0 : 40,
+                    mr: isCollapsed ? 0 : 2,
+                    justifyContent: 'center',
+                  }}
+                >
+                  <SettingsIcon />
+                </ListItemIcon>
+                {!isCollapsed && (
+                  <ListItemText
+                    primary="Settings"
+                    sx={{
+                      '& .MuiTypography-root': {
+                        color: activeView === 'settings'
+                          ? theme.palette.primary.main
+                          : 'inherit',
+                        fontSize: '0.875rem',
+                      },
+                    }}
+                  />
+                )}
+              </ListItem>
+            </Tooltip>
+            <Box sx={{ display: 'flex', justifyContent: 'flex-end', p: 1 }}>
+              <IconButton onClick={handleDrawerToggle}>
+                {isCollapsed ? <ChevronRight /> : <ChevronLeft />}
+              </IconButton>
+            </Box>
+          </List>
         </Box>
       </Drawer>
 
