@@ -7,7 +7,6 @@ from django.core.exceptions import ValidationError
 from .services import AICodeGenerator, AIModel
 from .serializers import (
     CodeGenerationSerializer,
-    ProjectStructureSerializer,
     CodeTemplateSerializer,
 )
 from .models import CodeGeneration, CodeTemplate

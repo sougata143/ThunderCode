@@ -27,22 +27,6 @@ An AI-powered Integrated Development Environment (IDE) that enhances developer p
 | Go         | All Models        | ✅                | Go Test          | Go Doc        |
 | Rust       | All Models        | ✅                | Cargo Test       | Rust Doc      |
 
-### 🛠️ Development Features
-- Intelligent code completion
-- Real-time error detection
-- Automated code review
-- Git integration
-- Customizable themes
-- Multi-language support
-- Integrated terminal
-
-### 🚀 Project Management
-- Project templates
-- Dependency management
-- Build automation
-- Testing framework integration
-- Documentation generation
-
 ## 🏗️ Tech Stack
 
 ### Frontend
@@ -67,48 +51,132 @@ An AI-powered Integrated Development Environment (IDE) that enhances developer p
 - GitHub Actions for CI/CD
 - CloudFormation for infrastructure
 
-## 🔧 Installation
+## 🔧 Prerequisites
 
-1. Clone the repository:
+- Python 3.8 or higher
+- Node.js 14 or higher
+- Docker and Docker Compose (optional, for containerized setup)
+- Git
+
+## 🚀 Getting Started
+
+### 1. Clone the Repository
 ```bash
 git clone https://github.com/yourusername/thundercode.git
 cd thundercode
 ```
 
-2. Set up environment variables:
+### 2. Environment Setup
+
+#### Backend Configuration
 ```bash
-# Create .env files for both frontend and backend
-cp frontend/.env.example frontend/.env
+# Create and configure backend environment
 cp backend/.env.example backend/.env
 
-# Configure your AI API keys
+# Required environment variables in backend/.env:
+DEBUG=1
+DJANGO_ALLOWED_HOSTS=localhost 127.0.0.1 [::1]
+SECRET_KEY=your-secret-key-here
+
+# AI API Keys
 OPENAI_API_KEY=your_openai_key
 CODELLAMA_API_KEY=your_codellama_key
 ANTHROPIC_API_KEY=your_anthropic_key
 QWEN_API_KEY=your_qwen_key
 QWEN_API_BASE=your_qwen_api_base
+
+# Database Configuration
+DB_NAME=thundercode
+DB_USER=thundercode
+DB_PASSWORD=thundercode
+DB_HOST=localhost
+DB_PORT=5432
 ```
 
-## 🎯 Usage
+#### Frontend Configuration
+```bash
+# Create and configure frontend environment
+cp frontend/.env.example frontend/.env
 
-### Setting Up a New Project
-1. Click "New Project" in the IDE
-2. Select your preferred programming language
-3. Choose an AI model based on your needs:
-   - GPT-4: Best for complex projects
-   - GPT-3.5 Turbo: Fast and efficient for simple tasks
-   - CodeLlama: Specialized code generation
-   - Claude 2: Advanced reasoning and documentation
-   - Qwen 72B: Excellent for multilingual projects, especially with Asian languages
-4. Enter project details and requirements
-5. Let ThunderCode generate your project structure
+# Required environment variables in frontend/.env:
+REACT_APP_API_URL=http://localhost:8000
+REACT_APP_WS_URL=ws://localhost:8000/ws/
+REACT_APP_ENV=development
+```
 
-### Code Generation
-1. Use the command palette (Ctrl/Cmd + Shift + P)
-2. Select "Generate Code"
-3. Choose your preferred AI model
-4. Describe what you want to create
-5. Review and accept the generated code
+### 3. Running the Application
+
+#### Option 1: Using Docker (Recommended)
+```bash
+# Build and start all services
+docker-compose up --build
+
+# Access the application:
+# Frontend: http://localhost:80
+# Backend API: http://localhost:8000
+# API Documentation: http://localhost:8000/api/docs/
+```
+
+#### Option 2: Local Development Setup
+
+1. Backend Setup:
+```bash
+# Create and activate virtual environment
+cd backend
+python -m venv venv
+source venv/bin/activate  # On Windows: .\venv\Scripts\activate
+
+# Install dependencies
+pip install -r requirements.txt
+
+# Run migrations
+python manage.py migrate
+
+# Start backend server
+python manage.py runserver
+```
+
+2. Frontend Setup:
+```bash
+# Install dependencies
+cd frontend
+npm install
+
+# Start frontend development server
+npm start
+```
+
+3. Access the Application:
+- Frontend: http://localhost:3000
+- Backend API: http://localhost:8000
+- API Documentation: http://localhost:8000/api/docs/
+
+### 4. Development Features
+- Hot reloading enabled for both frontend and backend
+- Debug mode active in development
+- API documentation available
+- Automatic code formatting
+- TypeScript type checking
+
+## 🔍 API Documentation
+
+Once the application is running, you can access the API documentation at:
+- Swagger UI: http://localhost:8000/api/docs/
+- ReDoc: http://localhost:8000/api/redoc/
+
+## 🧪 Testing
+
+### Backend Tests
+```bash
+cd backend
+python manage.py test
+```
+
+### Frontend Tests
+```bash
+cd frontend
+npm test
+```
 
 ## 🔐 Security
 
@@ -120,11 +188,32 @@ QWEN_API_BASE=your_qwen_api_base
 ## 🤝 Contributing
 
 1. Fork the repository
-2. Create your feature branch
-3. Commit your changes
-4. Push to the branch
-5. Create a Pull Request
+2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
+3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
+4. Push to the branch (`git push origin feature/AmazingFeature`)
+5. Open a Pull Request
 
 ## 📄 License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## 🆘 Troubleshooting
+
+### Common Issues
+
+1. **Backend API Connection Failed**
+   - Check if backend server is running
+   - Verify API URL in frontend .env file
+   - Ensure all required environment variables are set
+
+2. **AI Model Errors**
+   - Verify API keys are correctly set in backend .env
+   - Check API rate limits
+   - Ensure proper network connectivity
+
+3. **Docker Issues**
+   - Ensure Docker daemon is running
+   - Check port availability (80 and 8000)
+   - Verify Docker Compose installation
+
+For more issues and solutions, please check our [Wiki](wiki) or open an issue.
