@@ -4,13 +4,36 @@ ThunderCode is a revolutionary AI-powered Integrated Development Environment (ID
 
 ## Features
 
-- 🌍 Multi-Language Support (Python, Java, JavaScript, C++)
 - 🤖 AI-Based Code Generation
 - 🔍 AI Enhanced Code Review
 - 💡 Intelligent Code Suggestions
 - ⚡ Integrated Code Compilation & Execution
 - 🔄 Git Version Control Integration
 - 🎨 Customizable UI Themes
+
+## Supported Languages
+
+ThunderCode provides comprehensive support for multiple programming languages:
+
+| Language   | Features                                                          |
+|------------|------------------------------------------------------------------|
+| Python     | - Project Templates<br>- AI Code Generation<br>- Dependency Management (pip)<br>- Testing Framework Setup<br>- Documentation Generation |
+| JavaScript | - Modern ES6+ Support<br>- NPM Integration<br>- React/Node.js Templates<br>- Testing (Jest) Setup<br>- ESLint Configuration |
+| TypeScript | - Type-Safe Development<br>- TSConfig Setup<br>- React/Node.js Templates<br>- Testing Framework Integration<br>- Type Definition Support |
+| Java       | - Project Structure Generation<br>- Maven/Gradle Support<br>- Testing (JUnit) Setup<br>- JavaDoc Generation<br>- Spring Boot Templates |
+| C++        | - CMake Integration<br>- Build System Setup<br>- Testing Framework<br>- Header Organization<br>- Standard Library Support |
+| Go         | - Go Modules Support<br>- Testing Integration<br>- Package Management<br>- Documentation Generation<br>- Standard Project Layout |
+| Rust       | - Cargo Integration<br>- Package Management<br>- Testing Framework<br>- Documentation Support<br>- Safe Memory Management |
+
+Each language includes:
+- Syntax highlighting
+- Intelligent code completion
+- Error detection and quick fixes
+- AI-powered code generation
+- Project templates and boilerplates
+- Integrated testing support
+- Documentation generation
+- Build and deployment configurations
 
 ## Project Structure
 
