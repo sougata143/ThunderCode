@@ -1,175 +1,130 @@
-# ThunderCode - AI-Powered IDE
+# ThunderCode
 
-ThunderCode is a revolutionary AI-powered Integrated Development Environment (IDE) that enhances developer productivity through intelligent code generation, review, and suggestions.
+An AI-powered Integrated Development Environment (IDE) that enhances developer productivity through intelligent code generation and development tools.
 
-## Features
+## 🌟 Features
 
-- 🤖 AI-Based Code Generation
-- 🔍 AI Enhanced Code Review
-- 💡 Intelligent Code Suggestions
-- ⚡ Integrated Code Compilation & Execution
-- 🔄 Git Version Control Integration
-- 🎨 Customizable UI Themes
-
-## Supported Languages
-
-ThunderCode provides comprehensive support for multiple programming languages:
-
-| Language   | Features                                                          |
-|------------|------------------------------------------------------------------|
-| Python     | - Project Templates<br>- AI Code Generation<br>- Dependency Management (pip)<br>- Testing Framework Setup<br>- Documentation Generation |
-| JavaScript | - Modern ES6+ Support<br>- NPM Integration<br>- React/Node.js Templates<br>- Testing (Jest) Setup<br>- ESLint Configuration |
-| TypeScript | - Type-Safe Development<br>- TSConfig Setup<br>- React/Node.js Templates<br>- Testing Framework Integration<br>- Type Definition Support |
-| Java       | - Project Structure Generation<br>- Maven/Gradle Support<br>- Testing (JUnit) Setup<br>- JavaDoc Generation<br>- Spring Boot Templates |
-| C++        | - CMake Integration<br>- Build System Setup<br>- Testing Framework<br>- Header Organization<br>- Standard Library Support |
-| Go         | - Go Modules Support<br>- Testing Integration<br>- Package Management<br>- Documentation Generation<br>- Standard Project Layout |
-| Rust       | - Cargo Integration<br>- Package Management<br>- Testing Framework<br>- Documentation Support<br>- Safe Memory Management |
-
-Each language includes:
-- Syntax highlighting
+### 🤖 AI-Powered Code Generation
+- Multiple AI model support for diverse coding needs:
+  - **GPT-4**: Most capable model for complex projects and advanced code generation
+  - **GPT-3.5 Turbo**: Fast and cost-effective for simpler projects
+  - **CodeLlama 34B**: Specialized in code generation and completion
+  - **Claude 2**: Advanced reasoning and code understanding
+  - **Qwen 72B**: Multilingual code generation with strong performance in Asian languages
+- Contextual code suggestions
+- Project structure generation
+- Code template customization
 - Intelligent code completion
-- Error detection and quick fixes
-- AI-powered code generation
-- Project templates and boilerplates
-- Integrated testing support
+
+### 💻 Supported Programming Languages
+| Language   | AI Code Generation | Project Templates | Testing Framework | Documentation |
+|------------|-------------------|-------------------|-------------------|---------------|
+| Python     | All Models        | ✅                | pytest           | Sphinx        |
+| JavaScript | All Models        | ✅                | Jest             | JSDoc         |
+| TypeScript | All Models        | ✅                | Jest             | TypeDoc       |
+| Java       | All Models        | ✅                | JUnit            | JavaDoc       |
+| C++        | All Models        | ✅                | Google Test      | Doxygen       |
+| Go         | All Models        | ✅                | Go Test          | Go Doc        |
+| Rust       | All Models        | ✅                | Cargo Test       | Rust Doc      |
+
+### 🛠️ Development Features
+- Intelligent code completion
+- Real-time error detection
+- Automated code review
+- Git integration
+- Customizable themes
+- Multi-language support
+- Integrated terminal
+
+### 🚀 Project Management
+- Project templates
+- Dependency management
+- Build automation
+- Testing framework integration
 - Documentation generation
-- Build and deployment configurations
 
-## Project Structure
+## 🏗️ Tech Stack
 
-```
-thundercode/
-├── frontend/               # React frontend application
-│   ├── src/               # Source files
-│   ├── public/            # Public assets
-│   └── Dockerfile         # Frontend Docker configuration
-├── backend/               # Django backend application
-│   ├── code_generation/   # Code generation service
-│   ├── project_management/# Project management service
-│   └── Dockerfile         # Backend Docker configuration
-└── aws/                   # AWS deployment configuration
-    ├── cloudformation/    # CloudFormation templates
-    │   ├── ecr.yml        # ECR repositories setup
-    │   ├── ecs-cluster.yml# ECS cluster and VPC setup
-    │   └── ecs-services.yml# ECS services and tasks
-    └── setup.sh           # AWS infrastructure setup script
-```
+### Frontend
+- React.js with TypeScript
+- Material-UI for components
+- Redux for state management
+- Monaco Editor for code editing
 
-## Tech Stack
+### Backend
+- Django REST Framework
+- Multiple AI Model Integration:
+  - OpenAI API (GPT-4, GPT-3.5)
+  - CodeLlama API
+  - Anthropic API (Claude)
+  - Qwen API
+- MongoDB for data storage
+- Redis for caching
 
-- Frontend: React.js with TypeScript
-- Backend: Django with REST API
-- AI/ML: TensorFlow, OpenAI GPT
-- Database: MongoDB
-- Deployment: Docker, AWS ECS
-- Infrastructure as Code: AWS CloudFormation
+### DevOps
+- Docker containerization
+- AWS deployment (ECS, ECR)
+- GitHub Actions for CI/CD
+- CloudFormation for infrastructure
 
-## Local Development Setup
+## 🔧 Installation
 
-1. Clone the repository
+1. Clone the repository:
 ```bash
 git clone https://github.com/yourusername/thundercode.git
 cd thundercode
 ```
 
-2. Install frontend dependencies
+2. Set up environment variables:
 ```bash
-cd frontend
-npm install
+# Create .env files for both frontend and backend
+cp frontend/.env.example frontend/.env
+cp backend/.env.example backend/.env
+
+# Configure your AI API keys
+OPENAI_API_KEY=your_openai_key
+CODELLAMA_API_KEY=your_codellama_key
+ANTHROPIC_API_KEY=your_anthropic_key
+QWEN_API_KEY=your_qwen_key
+QWEN_API_BASE=your_qwen_api_base
 ```
 
-3. Install backend dependencies
-```bash
-cd backend
-pip install -r requirements.txt
-```
+## 🎯 Usage
 
-4. Set up environment variables
-```bash
-cp .env.example .env
-# Edit .env with your configuration
-```
+### Setting Up a New Project
+1. Click "New Project" in the IDE
+2. Select your preferred programming language
+3. Choose an AI model based on your needs:
+   - GPT-4: Best for complex projects
+   - GPT-3.5 Turbo: Fast and efficient for simple tasks
+   - CodeLlama: Specialized code generation
+   - Claude 2: Advanced reasoning and documentation
+   - Qwen 72B: Excellent for multilingual projects, especially with Asian languages
+4. Enter project details and requirements
+5. Let ThunderCode generate your project structure
 
-5. Start the development servers
-```bash
-# Frontend
-cd frontend
-npm start
+### Code Generation
+1. Use the command palette (Ctrl/Cmd + Shift + P)
+2. Select "Generate Code"
+3. Choose your preferred AI model
+4. Describe what you want to create
+5. Review and accept the generated code
 
-# Backend
-cd backend
-python manage.py runserver
-```
+## 🔐 Security
 
-## Docker Deployment
+- Secure API key management
+- Encrypted data transmission
+- Role-based access control
+- Regular security updates
 
-Run the entire application using Docker Compose:
+## 🤝 Contributing
 
-```bash
-# Build and start all services
-docker-compose up --build
+1. Fork the repository
+2. Create your feature branch
+3. Commit your changes
+4. Push to the branch
+5. Create a Pull Request
 
-# Stop all services
-docker-compose down
-```
-
-Individual container management:
-```bash
-# Build and run frontend
-docker build -t thundercode-frontend ./frontend
-docker run -p 80:80 thundercode-frontend
-
-# Build and run backend
-docker build -t thundercode-backend ./backend
-docker run -p 8000:8000 thundercode-backend
-```
-
-## AWS Deployment
-
-### Prerequisites
-- AWS CLI installed and configured
-- Docker installed
-- AWS account with appropriate permissions
-
-### Infrastructure Setup
-
-1. Make the setup script executable:
-```bash
-chmod +x aws/setup.sh
-```
-
-2. Deploy the AWS infrastructure:
-```bash
-cd aws
-./setup.sh --region us-west-2 --environment production
-```
-
-This will create:
-- ECR repositories for container images
-- ECS Fargate cluster
-- VPC with public subnets
-- Application Load Balancers
-- Security Groups and IAM roles
-
-### Continuous Deployment
-
-The project includes GitHub Actions workflows for automated deployment:
-
-1. Push to the main branch triggers the deployment workflow
-2. Docker images are built and pushed to ECR
-3. ECS services are updated with new images
-4. Application is deployed across multiple availability zones
-
-Monitor the deployment:
-- Frontend: Access through the Frontend ALB URL
-- Backend: Access through the Backend ALB URL
-- Logs: Available in CloudWatch Logs
-- Metrics: Available in CloudWatch Metrics
-
-## Contributing
-
-Please read [CONTRIBUTING.md](CONTRIBUTING.md) for details on our code of conduct and the process for submitting pull requests.
-
-## License
+## 📄 License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.

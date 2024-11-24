@@ -2,44 +2,55 @@ from django.shortcuts import render
 from rest_framework import viewsets, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
+from rest_framework.permissions import IsAuthenticated
+from django.core.exceptions import ValidationError
+from .services import AICodeGenerator, AIModel
+from .serializers import (
+    CodeGenerationSerializer,
+    ProjectStructureSerializer,
+    CodeTemplateSerializer,
+)
 from .models import CodeGeneration, CodeTemplate
-from .serializers import CodeGenerationSerializer, CodeTemplateSerializer
-from .services import code_generator
-import json
-from asgiref.sync import async_to_sync
 
 class CodeGenerationViewSet(viewsets.ModelViewSet):
-    queryset = CodeGeneration.objects.all()
+    permission_classes = [IsAuthenticated]
     serializer_class = CodeGenerationSerializer
+    queryset = CodeGeneration.objects.all()
+
+    def get_code_generator(self, ai_model: str) -> AICodeGenerator:
+        try:
+            model_type = AIModel[ai_model.upper().replace('-', '_')]
+            return AICodeGenerator(model_type=model_type)
+        except KeyError:
+            raise ValidationError(f"Invalid AI model: {ai_model}")
 
     @action(detail=False, methods=['post'])
-    def generate_code(self, request):
+    async def generate_code(self, request):
         prompt = request.data.get('prompt')
         language = request.data.get('language')
-        
+        ai_model = request.data.get('aiModel', 'gpt-4')
+
         if not prompt or not language:
             return Response(
-                {'error': 'Both prompt and language are required'},
+                {'error': 'Prompt and language are required'},
                 status=status.HTTP_400_BAD_REQUEST
             )
-        
+
         try:
-            # Use AI service for code generation
-            generated_code = async_to_sync(code_generator.generate_code)(prompt, language)
-            
-            # Create generation record
-            serializer = self.get_serializer(data={
-                'prompt': prompt,
-                'language': language,
-                'generated_code': generated_code,
-                'model_used': 'gpt-4'
-            })
-            
-            if serializer.is_valid():
-                serializer.save()
-                return Response(serializer.data, status=status.HTTP_201_CREATED)
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-            
+            code_generator = self.get_code_generator(ai_model)
+            generated_code = await code_generator.generate_code(prompt, language)
+
+            generation = CodeGeneration.objects.create(
+                user=request.user,
+                prompt=prompt,
+                language=language,
+                generated_code=generated_code,
+                ai_model=ai_model
+            )
+
+            serializer = self.get_serializer(generation)
+            return Response(serializer.data)
+
         except Exception as e:
             return Response(
                 {'error': str(e)},
@@ -47,9 +58,10 @@ class CodeGenerationViewSet(viewsets.ModelViewSet):
             )
 
     @action(detail=False, methods=['post'])
-    def generate_project(self, request):
+    async def generate_project(self, request):
         prompt = request.data.get('prompt')
         language = request.data.get('language')
+        ai_model = request.data.get('aiModel', 'gpt-4')
         
         if not prompt or not language:
             return Response(
@@ -59,14 +71,15 @@ class CodeGenerationViewSet(viewsets.ModelViewSet):
         
         try:
             # Generate project structure using AI service
-            files, dependencies, setup_instructions = async_to_sync(code_generator.generate_project_structure)(
+            code_generator = self.get_code_generator(ai_model)
+            files, dependencies, setup_instructions = await code_generator.generate_project_structure(
                 prompt, language
             )
             
             return Response({
                 'files': files,
                 'dependencies': dependencies,
-                'setup_instructions': setup_instructions
+                'setupInstructions': setup_instructions
             }, status=status.HTTP_201_CREATED)
             
         except Exception as e:
@@ -76,7 +89,7 @@ class CodeGenerationViewSet(viewsets.ModelViewSet):
             )
 
     @action(detail=True, methods=['post'])
-    def provide_feedback(self, request, pk=None):
+    async def provide_feedback(self, request, pk=None):
         generation = self.get_object()
         rating = request.data.get('rating')
         comment = request.data.get('comment')
@@ -94,7 +107,7 @@ class CodeGenerationViewSet(viewsets.ModelViewSet):
         return Response({'status': 'Feedback recorded'})
 
     @action(detail=False, methods=['post'])
-    def analyze_code(self, request):
+    async def analyze_code(self, request):
         code = request.data.get('code')
         language = request.data.get('language')
         
@@ -105,7 +118,7 @@ class CodeGenerationViewSet(viewsets.ModelViewSet):
             )
         
         try:
-            analysis = async_to_sync(code_generator.analyze_code_quality)(code, language)
+            analysis = await AICodeGenerator().analyze_code_quality(code, language)
             return Response(analysis, status=status.HTTP_200_OK)
         except Exception as e:
             return Response(
@@ -114,17 +127,33 @@ class CodeGenerationViewSet(viewsets.ModelViewSet):
             )
 
 class CodeTemplateViewSet(viewsets.ModelViewSet):
-    queryset = CodeTemplate.objects.all()
+    permission_classes = [IsAuthenticated]
     serializer_class = CodeTemplateSerializer
+    queryset = CodeTemplate.objects.all()
+
+    def get_code_generator(self, ai_model: str) -> AICodeGenerator:
+        try:
+            model_type = AIModel[ai_model.upper().replace('-', '_')]
+            return AICodeGenerator(model_type=model_type)
+        except KeyError:
+            raise ValidationError(f"Invalid AI model: {ai_model}")
 
     @action(detail=True, methods=['post'])
-    def generate_from_template(self, request, pk=None):
+    async def generate_from_template(self, request, pk=None):
         template = self.get_object()
         variables = request.data.get('variables', {})
+        ai_model = request.data.get('aiModel', 'gpt-4')
+        
+        if not variables:
+            return Response(
+                {'error': 'Variables are required'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
         
         try:
             # Generate code from template using AI service
-            generated_code = async_to_sync(code_generator.generate_from_template)(
+            code_generator = self.get_code_generator(ai_model)
+            generated_code = await code_generator.generate_from_template(
                 template.template_code, variables
             )
             
@@ -133,6 +162,7 @@ class CodeTemplateViewSet(viewsets.ModelViewSet):
                 'prompt': f"Generated from template: {template.name}",
                 'language': template.language,
                 'generated_code': generated_code,
+                'ai_model': ai_model,
                 'model_used': 'template'
             })
             

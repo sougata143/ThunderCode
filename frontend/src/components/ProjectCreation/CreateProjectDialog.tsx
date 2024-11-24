@@ -32,6 +32,14 @@ const LANGUAGE_OPTIONS = [
   'Rust',
 ];
 
+const AI_MODEL_OPTIONS = [
+  { value: 'gpt-4', label: 'GPT-4 (Most Capable)', description: 'Best for complex projects and advanced code generation' },
+  { value: 'gpt-3.5-turbo', label: 'GPT-3.5 Turbo', description: 'Fast and cost-effective for simpler projects' },
+  { value: 'codellama-34b', label: 'CodeLlama 34B', description: 'Specialized in code generation and completion' },
+  { value: 'anthropic-claude-2', label: 'Claude 2', description: 'Advanced reasoning and code understanding' },
+  { value: 'qwen-72b', label: 'Qwen 72B', description: 'Multilingual code generation with strong performance in Asian languages' },
+];
+
 export const CreateProjectDialog: React.FC<CreateProjectDialogProps> = ({
   open,
   onClose,
@@ -39,6 +47,7 @@ export const CreateProjectDialog: React.FC<CreateProjectDialogProps> = ({
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
   const [language, setLanguage] = useState('');
+  const [aiModel, setAIModel] = useState('gpt-4');
   const [prompt, setPrompt] = useState('');
   const [gitRepo, setGitRepo] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -49,34 +58,33 @@ export const CreateProjectDialog: React.FC<CreateProjectDialogProps> = ({
   );
 
   const handleSubmit = async () => {
-    if (!name || !language) {
+    if (!name || !description || !language) {
       return;
     }
 
     setIsLoading(true);
     try {
-      // Create the project first
-      const project = await createProject({
+      const projectStructure = await generateProjectStructure({
         name,
         description,
-        programming_language: language,
-        git_repo_url: gitRepo,
+        language,
+        aiModel,
+        prompt,
       });
 
-      // If there's a prompt, generate the project structure
-      if (prompt && project) {
-        await generateProjectStructure({
-          projectId: project.id,
-          prompt,
-          language,
-        });
-      }
+      await createProject({
+        name,
+        description,
+        language,
+        gitRepo,
+        files: projectStructure.files,
+        dependencies: projectStructure.dependencies,
+        setupInstructions: projectStructure.setupInstructions,
+      });
 
       onClose();
-      // You might want to navigate to the project here
     } catch (error) {
-      console.error('Error creating project:', error);
-      // Handle error (show notification, etc.)
+      console.error('Failed to create project:', error);
     } finally {
       setIsLoading(false);
     }
@@ -86,6 +94,7 @@ export const CreateProjectDialog: React.FC<CreateProjectDialogProps> = ({
     setName('');
     setDescription('');
     setLanguage('');
+    setAIModel('gpt-4');
     setPrompt('');
     setGitRepo('');
     onClose();
@@ -101,17 +110,18 @@ export const CreateProjectDialog: React.FC<CreateProjectDialogProps> = ({
             value={name}
             onChange={(e) => setName(e.target.value)}
             required
-            fullWidth
           />
+          
           <TextField
             label="Description"
             value={description}
             onChange={(e) => setDescription(e.target.value)}
             multiline
-            rows={2}
-            fullWidth
+            rows={3}
+            required
           />
-          <FormControl fullWidth required>
+
+          <FormControl required>
             <InputLabel>Programming Language</InputLabel>
             <Select
               value={language}
@@ -125,29 +135,42 @@ export const CreateProjectDialog: React.FC<CreateProjectDialogProps> = ({
               ))}
             </Select>
           </FormControl>
+
+          <FormControl>
+            <InputLabel>AI Model</InputLabel>
+            <Select
+              value={aiModel}
+              onChange={(e) => setAIModel(e.target.value)}
+              label="AI Model"
+            >
+              {AI_MODEL_OPTIONS.map((model) => (
+                <MenuItem key={model.value} value={model.value}>
+                  <Box>
+                    <Typography variant="subtitle1">{model.label}</Typography>
+                    <Typography variant="caption" color="textSecondary">
+                      {model.description}
+                    </Typography>
+                  </Box>
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+
+          <TextField
+            label="Additional Instructions (Optional)"
+            value={prompt}
+            onChange={(e) => setPrompt(e.target.value)}
+            multiline
+            rows={3}
+            placeholder="Add any specific requirements or preferences for your project structure..."
+          />
+
           <TextField
             label="Git Repository URL (Optional)"
             value={gitRepo}
             onChange={(e) => setGitRepo(e.target.value)}
-            fullWidth
+            placeholder="https://github.com/username/repository"
           />
-          <Box sx={{ mt: 2 }}>
-            <Typography variant="subtitle1" gutterBottom>
-              Project Generation Prompt (Optional)
-            </Typography>
-            <Typography variant="body2" color="text.secondary" gutterBottom>
-              Describe your project and its features. Our AI will generate a
-              project structure based on your description.
-            </Typography>
-            <TextField
-              value={prompt}
-              onChange={(e) => setPrompt(e.target.value)}
-              multiline
-              rows={4}
-              fullWidth
-              placeholder="Example: Create a web application for managing personal tasks with user authentication, task categories, due dates, and priority levels..."
-            />
-          </Box>
         </Box>
       </DialogContent>
       <DialogActions>
@@ -155,16 +178,9 @@ export const CreateProjectDialog: React.FC<CreateProjectDialogProps> = ({
         <Button
           onClick={handleSubmit}
           variant="contained"
-          disabled={!name || !language || isLoading}
+          disabled={isLoading || !name || !description || !language}
         >
-          {isLoading ? (
-            <>
-              <CircularProgress size={20} sx={{ mr: 1 }} />
-              Creating...
-            </>
-          ) : (
-            'Create Project'
-          )}
+          {isLoading ? <CircularProgress size={24} /> : 'Create Project'}
         </Button>
       </DialogActions>
     </Dialog>

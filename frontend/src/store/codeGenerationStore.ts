@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import api from '../services/api';
 
 interface GeneratedCode {
   id: number;
@@ -36,18 +37,20 @@ interface CodeGenerationState {
   templates: CodeTemplate[];
   isLoading: boolean;
   error: string | null;
-  generateCode: (prompt: string, language: string) => Promise<GeneratedCode>;
+  generateCode: (prompt: string, language: string, aiModel: string) => Promise<GeneratedCode>;
   generateProjectStructure: (params: {
     projectId: number;
     prompt: string;
     language: string;
+    aiModel: string;
   }) => Promise<ProjectStructure>;
   provideFeedback: (id: number, rating: number, comment?: string) => Promise<void>;
   fetchTemplates: () => Promise<void>;
   createTemplate: (template: Partial<CodeTemplate>) => Promise<void>;
   generateFromTemplate: (
     templateId: number,
-    variables: Record<string, any>
+    variables: Record<string, any>,
+    aiModel: string
   ) => Promise<GeneratedCode>;
 }
 
@@ -57,15 +60,13 @@ export const useCodeGenerationStore = create<CodeGenerationState>((set, get) => 
   isLoading: false,
   error: null,
 
-  generateCode: async (prompt: string, language: string) => {
+  generateCode: async (prompt: string, language: string, aiModel: string) => {
     set({ isLoading: true, error: null });
     try {
-      const response = await fetch('/api/code-generation/generate/', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ prompt, language }),
+      const response = await api.post('/api/code-generation/generate/', {
+        prompt,
+        language,
+        aiModel,
       });
 
       if (!response.ok) {
@@ -86,15 +87,14 @@ export const useCodeGenerationStore = create<CodeGenerationState>((set, get) => 
     }
   },
 
-  generateProjectStructure: async ({ projectId, prompt, language }) => {
+  generateProjectStructure: async ({ projectId, prompt, language, aiModel }) => {
     set({ isLoading: true, error: null });
     try {
-      const response = await fetch('/api/code-generation/generate-project/', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ project_id: projectId, prompt, language }),
+      const response = await api.post('/api/code-generation/generate-project/', {
+        project_id: projectId,
+        prompt,
+        language,
+        aiModel,
       });
 
       if (!response.ok) {
@@ -114,12 +114,9 @@ export const useCodeGenerationStore = create<CodeGenerationState>((set, get) => 
   provideFeedback: async (id: number, rating: number, comment?: string) => {
     set({ isLoading: true, error: null });
     try {
-      const response = await fetch(`/api/code-generation/${id}/feedback/`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ rating, comment }),
+      const response = await api.post(`/api/code-generation/${id}/feedback/`, {
+        rating,
+        comment,
       });
 
       if (!response.ok) {
@@ -143,7 +140,7 @@ export const useCodeGenerationStore = create<CodeGenerationState>((set, get) => 
   fetchTemplates: async () => {
     set({ isLoading: true, error: null });
     try {
-      const response = await fetch('/api/code-generation/templates/');
+      const response = await api.get('/api/code-generation/templates/');
       if (!response.ok) {
         throw new Error('Failed to fetch templates');
       }
@@ -160,13 +157,7 @@ export const useCodeGenerationStore = create<CodeGenerationState>((set, get) => 
   createTemplate: async (template: Partial<CodeTemplate>) => {
     set({ isLoading: true, error: null });
     try {
-      const response = await fetch('/api/code-generation/templates/', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(template),
-      });
+      const response = await api.post('/api/code-generation/templates/', template);
 
       if (!response.ok) {
         throw new Error('Failed to create template');
@@ -184,19 +175,13 @@ export const useCodeGenerationStore = create<CodeGenerationState>((set, get) => 
     }
   },
 
-  generateFromTemplate: async (templateId: number, variables: Record<string, any>) => {
+  generateFromTemplate: async (templateId: number, variables: Record<string, any>, aiModel: string) => {
     set({ isLoading: true, error: null });
     try {
-      const response = await fetch(
-        `/api/code-generation/templates/${templateId}/generate/`,
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ variables }),
-        }
-      );
+      const response = await api.post(`/api/code-generation/templates/${templateId}/generate/`, {
+        variables,
+        aiModel,
+      });
 
       if (!response.ok) {
         throw new Error('Failed to generate from template');
