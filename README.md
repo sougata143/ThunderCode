@@ -27,6 +27,19 @@ An AI-powered Integrated Development Environment (IDE) that enhances developer p
 | Go         | All Models        | ✅                | Go Test          | Go Doc        |
 | Rust       | All Models        | ✅                | Cargo Test       | Rust Doc      |
 
+### 🎨 Modern UI Features
+- **Collapsible Sidebar**: Flexible workspace management with collapsible menu for maximized coding space
+- **Multi-Panel Layout**:
+  - File Explorer: Browse and manage project files
+  - Search: Advanced code search capabilities
+  - Source Control: Integrated Git operations
+  - Extensions: Manage IDE extensions
+  - AI Assistant: Quick access to AI features
+  - Debug: Integrated debugging tools
+- **Material Design**: Modern and intuitive user interface with Material-UI components
+- **Responsive Layout**: Adapts to different screen sizes and orientations
+- **Theme Support**: Light and dark mode themes
+
 ## 🏗️ Tech Stack
 
 ### Frontend
