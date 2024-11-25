@@ -149,3 +149,95 @@ Please read [CONTRIBUTING.md](CONTRIBUTING.md) for details on our code of conduc
 ## License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## Local LLM Implementation Details
+
+### Overview
+
+ThunderCode uses a local LLM implementation for code generation, providing a seamless and efficient coding experience.
+
+### Technical Details
+
+- **Model**: DistilGPT2
+- **Optimizations**:
+  - CPU-only processing
+  - Half-precision computation
+  - Minimal token generation
+  - Response caching
+  - Async processing
+
+### Setup
+
+#### Prerequisites
+
+- Python 3.9+
+- Node.js 16+
+- npm or yarn
+
+#### Backend Setup
+
+1. Create and activate virtual environment:
+```bash
+cd backend
+python -m venv venv
+source venv/bin/activate  # On Windows: venv\Scripts\activate
+```
+
+2. Install dependencies:
+```bash
+pip install -r requirements.txt
+```
+
+3. Run migrations:
+```bash
+python manage.py migrate
+```
+
+4. Start the server:
+```bash
+python manage.py runserver
+```
+
+#### Frontend Setup
+
+1. Install dependencies:
+```bash
+cd frontend
+npm install  # or: yarn install
+```
+
+2. Start development server:
+```bash
+npm run dev  # or: yarn dev
+```
+
+### Development
+
+#### Running Tests
+
+```bash
+# Backend tests
+cd backend
+python manage.py test
+
+# Frontend tests
+cd frontend
+npm test
+```
+
+#### Code Style
+
+- Backend: Follow PEP 8
+- Frontend: ESLint + Prettier configuration
+
+### Contributing
+
+1. Fork the repository
+2. Create your feature branch
+3. Commit your changes
+4. Push to the branch
+5. Create a Pull Request
+
+### License
+
+MIT License - see LICENSE file for details

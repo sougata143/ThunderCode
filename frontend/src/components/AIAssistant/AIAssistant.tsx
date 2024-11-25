@@ -1,5 +1,17 @@
 import React, { useState } from 'react';
-import { Box, TextField, Button, Typography, Paper, CircularProgress } from '@mui/material';
+import {
+  Box,
+  TextField,
+  Button,
+  Typography,
+  Paper,
+  CircularProgress,
+  FormControlLabel,
+  Switch,
+  Tooltip,
+  IconButton,
+} from '@mui/material';
+import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import { generateCode } from '../../services/api';
 import { useSnackbar } from 'notistack';
 
@@ -7,6 +19,7 @@ const AIAssistant: React.FC = () => {
   const [prompt, setPrompt] = useState('');
   const [generatedCode, setGeneratedCode] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [useLocalLLM, setUseLocalLLM] = useState(true);
   const { enqueueSnackbar } = useSnackbar();
 
   const handleGenerateCode = async () => {
@@ -22,6 +35,7 @@ const AIAssistant: React.FC = () => {
         temperature: 0.7,
         topP: 0.95,
         maxLength: 2048,
+        useLocalLLM,
       });
       setGeneratedCode(code);
     } catch (error) {
@@ -32,11 +46,30 @@ const AIAssistant: React.FC = () => {
     }
   };
 
+  const handleCopyCode = () => {
+    navigator.clipboard.writeText(generatedCode);
+    enqueueSnackbar('Code copied to clipboard', { variant: 'success' });
+  };
+
   return (
     <Box sx={{ height: '100%', display: 'flex', flexDirection: 'column', gap: 2 }}>
-      <Typography variant="h6" component="h2">
-        AI Assistant
-      </Typography>
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <Typography variant="h6" component="h2">
+          AI Assistant
+        </Typography>
+        <Tooltip title="Use local LLM for code generation">
+          <FormControlLabel
+            control={
+              <Switch
+                checked={useLocalLLM}
+                onChange={(e) => setUseLocalLLM(e.target.checked)}
+                color="primary"
+              />
+            }
+            label="Local LLM"
+          />
+        </Tooltip>
+      </Box>
       
       <TextField
         fullWidth
@@ -52,34 +85,50 @@ const AIAssistant: React.FC = () => {
       <Button
         variant="contained"
         onClick={handleGenerateCode}
-        disabled={isLoading}
+        disabled={isLoading || !prompt.trim()}
         sx={{ alignSelf: 'flex-start' }}
       >
-        {isLoading ? <CircularProgress size={24} /> : 'Generate Code'}
+        {isLoading ? (
+          <>
+            <CircularProgress size={24} sx={{ mr: 1 }} />
+            Generating...
+          </>
+        ) : (
+          'Generate Code'
+        )}
       </Button>
-      
+
       {generatedCode && (
         <Paper
           variant="outlined"
           sx={{
-            flex: 1,
-            p: 2,
+            flexGrow: 1,
             overflow: 'auto',
-            backgroundColor: (theme) =>
-              theme.palette.mode === 'dark' ? 'grey.900' : 'grey.100',
+            backgroundColor: 'grey.900',
+            position: 'relative',
           }}
         >
-          <Typography
+          <Box sx={{ position: 'absolute', top: 8, right: 8 }}>
+            <Tooltip title="Copy code">
+              <IconButton onClick={handleCopyCode} size="small" sx={{ color: 'grey.300' }}>
+                <ContentCopyIcon />
+              </IconButton>
+            </Tooltip>
+          </Box>
+          <Box
             component="pre"
             sx={{
-              fontFamily: 'monospace',
+              margin: 0,
+              padding: 2,
+              fontFamily: 'Consolas, Monaco, "Courier New", monospace',
+              fontSize: '14px',
+              color: 'grey.100',
               whiteSpace: 'pre-wrap',
               wordBreak: 'break-word',
-              m: 0,
             }}
           >
             {generatedCode}
-          </Typography>
+          </Box>
         </Paper>
       )}
     </Box>

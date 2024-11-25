@@ -100,6 +100,7 @@ export interface CodeGenerationRequest {
     topP?: number;
     topK?: number;
     numReturnSequences?: number;
+    useLocalLLM?: boolean;
 }
 
 export interface CodeGenerationResponse {
@@ -126,14 +127,10 @@ export const generateProjectStructure = async (params: {
 export const generateCode = async (request: CodeGenerationRequest): Promise<string> => {
     try {
         const response = await api.post<CodeGenerationResponse>(
-            '/generate',
+            '/ai/generate/',
             {
-                prompt: request.prompt,
-                max_length: request.maxLength,
-                temperature: request.temperature,
-                top_p: request.topP,
-                top_k: request.topK,
-                num_return_sequences: request.numReturnSequences,
+                ...request,
+                use_local_llm: request.useLocalLLM
             }
         );
         return response.data.generated_code;
